@@ -19,46 +19,18 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.get("/read", (req, res) => {
-  res.render("read");
-});
+app.get("/read", (req, res) => {});
 
 app.post("/create", async (req, res) => {
-  try {
-    let { name, email, image } = req.body;
+  let { name, email, image } = req.body;
+  let createdUser = userModel.create({
+    name: name,
+    email: email,
+    image: image,
+  });
 
-    // Validate required fields
-    if (!name || !email || !image) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    // Check if user with the same email already exists
-    const existingUser = await userModel.findOne({ email });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ error: "Email already exists. Please use a different email." });
-    }
-
-    // Create a new user
-    const createdUser = await userModel.create({ name, email, image });
-    res.status(201).json(createdUser);
-  } catch (error) {
-    console.error(error);
-
-    // Handle MongoDB duplicate key error
-    if (error.code === 11000) {
-      return res
-        .status(400)
-        .json({
-          error: "Email already registered. Please use a different email.",
-        });
-    }
-
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+  res.send(createdUser);
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server Running at http://localhost:${PORT}`);
